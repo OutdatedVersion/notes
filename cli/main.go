@@ -1,36 +1,24 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"io/ioutil"
+	"flag"
 	"log"
-	"net/http"
-	"os"
-	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
+)
+
+var (
+	channelFlag = flag.String("c", "@me", "name of the channel to save into")
 )
 
 func main() {
-	requestBody := map[string]string{"content": strings.Join(os.Args[1:], " ")}
-	json, err := json.Marshal(requestBody)
+	flag.Parse()
 
-	if err != nil {
-		log.Fatalln("We could not convert the input into JSON", err)
-	}
+	log.Printf("content: %s\n", flag.Args())
+	log.Printf("channel: %s\n", *channelFlag)
 
-	response, err := http.Post("https://bens.wtf/notes/api/@me", "application/json", bytes.NewBuffer(json))
-
-	if err != nil {
-		log.Fatalln("We could not make the request", err)
-	}
-
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
-
-	if err != nil {
-		log.Fatalln("Failed to read response body", err)
-	}
-
-	log.Print("http response: ", string(body))
+	// TODO(ben): configurable database location
+	// database, _ := sql.Open("sqlite3", "./notes.db")
+	// statement, _ := database.Prepare("CREATE TABLE IF NOT EXISTS notes (id BLOB PRIMARY KEY, content TEXT, active TINYINT, created_at DATETIME);")
+	// statement.Exec()
 }
